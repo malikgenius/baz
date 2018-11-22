@@ -3,23 +3,30 @@ const LendPaginate = require('mongoose-paginate');
 
 const Schema = mongoose.Schema;
 
-const LendSchema = new Schema({
-  user: {
-    type: Schema.Types.ObjectId,
-    ref: 'users'
+const LendSchema = new Schema(
+  {
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'users'
+    },
+    book: {
+      type: Schema.Types.ObjectId,
+      ref: 'book'
+    },
+    isActive: {
+      type: Boolean,
+      default: true
+    },
+    requestDate: {
+      type: Date,
+      default: Date.now
+    },
+    returnDate: {
+      type: Date
+    }
   },
-  book: {
-    type: Schema.Types.ObjectId,
-    ref: 'book'
-  },
-  requestDate: {
-    type: Date,
-    default: Date.now
-  },
-  returnDate: {
-    type: Date
-  }
-});
+  { timestamps: true }
+);
 
 LendSchema.plugin(LendPaginate);
 

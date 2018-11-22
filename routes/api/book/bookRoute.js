@@ -6,7 +6,7 @@ const {
   getBookById,
   editSingleBook,
   deleteSingleBook,
-  lendRequest
+  searchBook
 } = require('../../../controllers/bookController');
 
 // Get Route for All books ....
@@ -20,6 +20,6 @@ router.post('/editbook/:id', editSingleBook);
 // Delete Book route
 router.post('/deletebook/:id', deleteSingleBook);
 // LEND BOOk REQUEST FROM EMPLOYEE
-router.post('/lendrequest/:id', lendRequest);
+router.get('/searchbook/:search', searchBook);
 
 module.exports = router;

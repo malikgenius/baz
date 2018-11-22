@@ -6,7 +6,9 @@ Joi.objectId = require('joi-objectid')(Joi);
 
 // get all books
 exports.getAllLends = async (req, res, next) => {
-  const findBooks = await Lend.find().populate('book');
+  const findBooks = await Lend.find()
+    .populate('book')
+    .sort({ createdAt: -1 });
   try {
     if (!findBooks) {
       return res.status(404).send('No Books Found!');
@@ -33,9 +35,8 @@ exports.getLendById = async (req, res, next) => {
 
 // Single Book Add @POST
 exports.addLend = async (req, res, next) => {
-  console.log(req.body);
+  //   console.log(req.body);
   const currentDate = new Date();
-
   const newLend = {
     book: req.params.id,
     returnDate: currentDate.setDate(currentDate.getDate() + 7)
@@ -56,12 +57,22 @@ exports.addLend = async (req, res, next) => {
         );
     }
 
-    const book = await new Lend(newLend);
-    const saveLend = await book.save();
+    const lendedbook = await new Lend(newLend);
+    const saveLend = await lendedbook.save();
+    // const lendAdded = await requestedBook.lend.unshift(saveLend.id);
+    // const StockChanged = await {requestedBook.inStock: }
     const editBook = await Book.updateOne(
       { _id: requestedBook.id },
-      { inStock: false },
-      { new: true }
+      //   { inStock: false },
+      {
+        $set: {
+          inStock: false
+        },
+        $push: { lend: { $each: [{ lend: saveLend.id }], $position: 0 } }
+      },
+      { multi: true }
+      //   { array: { $push: { lend: { $each: ['value'], $position: 0 } } } },
+      //   { new: true }
     );
     // const saveBook = await editBook.save();
     return res.status(200).send(saveLend);
@@ -71,4 +82,40 @@ exports.addLend = async (req, res, next) => {
 };
 
 // Edit Single Lend ---- Return Lend
-exports.editSingleLend = (req, res, next) => {};
+exports.returnLend = async (req, res, next) => {
+  const currentDate = new Date();
+  const lendId = req.params.id;
+
+  const lendedBook = await Lend.findById(lendId);
+  const requestedBook = await Book.findById(lendedBook.book);
+  try {
+    if (!lendedBook) {
+      return res.status(404).send('No Lend record found with given ID');
+    }
+    if (!requestedBook) {
+      return res.status(404).send('No Book found');
+    }
+
+    const editLend = await Lend.findByIdAndUpdate(
+      { _id: lendId },
+      {
+        $set: {
+          isActive: false
+        }
+      },
+      { new: true }
+    );
+    const editBook = await Book.updateOne(
+      { _id: requestedBook },
+      {
+        $set: {
+          inStock: true
+        }
+      },
+      { new: true }
+    );
+    return res.send(lendedBook);
+  } catch (err) {
+    throw err;
+  }
+};

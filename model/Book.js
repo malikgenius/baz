@@ -19,8 +19,7 @@ const BookSchema = new Schema(
     },
     lend: [
       {
-        type: Schema.Types.ObjectId,
-        ref: 'lend'
+        lend: { type: Schema.Types.ObjectId, ref: 'lend' }
       }
     ],
     author: [authorSchema],

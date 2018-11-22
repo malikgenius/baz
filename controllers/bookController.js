@@ -6,7 +6,9 @@ Joi.objectId = require('joi-objectid')(Joi);
 
 // get all books
 exports.getAllBooks = async (req, res, next) => {
-  const findBooks = await Book.find();
+  const findBooks = await Book.find()
+    .populate('lend.lend')
+    .sort({ createdAt: -1 });
   try {
     if (!findBooks) {
       return res.status(404).send('No Books Found!');
@@ -142,23 +144,36 @@ exports.deleteSingleBook = async (req, res, next) => {
   }
 };
 
-// Book Lend Request
-exports.lendRequest = async (req, res, next) => {
-  const bookId = req.params.id;
-  const requestedBook = await Book.findById(bookId);
+// Search Book
+exports.searchBook = async (req, res, next) => {
+  const search = req.params.search;
+  console.log(search);
+  //below will search for malik but if malikmazhar is available it will bring that as well. $ is not at the end will continue looking for similar words.
+  const regexFree = new RegExp(['^', search].join(''), 'i');
+  //   const regexsecond = db.users.find( { 'name' : { '$regex' : yourvalue, '$options' : 'i' } } )
   try {
-    if (!requestedBook) {
-      return res.status(404).send('Requested Book not found');
+    // const bookSearch = await Book.find({ title: { $in: regexFree } });
+    // $regex works with any word search .. will extend it to search in any field.
+    const bookSearch = await Book.find({
+      //   title: { $regex: search, $options: 'i' }
+
+      $or: [
+        { title: { $regex: search, $options: 'i' } },
+        { classification: { $regex: search, $options: 'i' } },
+        { 'author.name': { $regex: search, $options: 'i' } },
+        { keywords: { $regex: search, $options: 'i' } }
+
+        // below are ints they are not applicable ... will have to find a way
+        // { 'depth.min': { $in: regexFree } },
+        // { 'depth.min': { $in: regexFree } }
+      ]
+    });
+
+    if (!bookSearch) {
+      return res.status(404).send('Sorry no matching book found');
     }
-    if (!requestedBook.inStock) {
-      return res
-        .status(404)
-        .send(
-          `Sorry book ${requestedBook.title} is not in Stock at the moment`
-        );
-    }
+    return res.status(200).send(bookSearch);
   } catch (err) {
-    return res.status(400).send(err);
+    throw err;
   }
-  return res.status(200).send(` you requested for ${bookId}`);
 };
