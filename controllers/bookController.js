@@ -13,7 +13,7 @@ exports.getAllBooks = async (req, res, next) => {
     if (!findBooks) {
       return res.status(404).send('No Books Found!');
     }
-    return res.status(200).json(findBooks);
+    return await res.status(200).json(findBooks);
   } catch (err) {
     return res.status(400).send(err);
   }
@@ -27,7 +27,7 @@ exports.getBookById = async (req, res, next) => {
     if (!singleBook) {
       return res.status(404).send(`No book Found by the given ID: ${bookId}`);
     }
-    return res.status(200).json(singleBook);
+    return await res.status(200).json(singleBook);
   } catch (err) {
     return res.status(400).send(err);
   }
@@ -81,7 +81,7 @@ exports.addBook = async (req, res, next) => {
   const book = new Book(newBook);
   try {
     const saveBook = await book.save();
-    return res.status(200).json(saveBook);
+    return await res.status(200).json(saveBook);
   } catch (err) {
     res.status(400).send(err);
   }
@@ -124,7 +124,7 @@ exports.editSingleBook = async (req, res, next) => {
     if (!bookUpdate) {
       return res.status(404).send(`Book not found with specified Id ${bookId}`);
     }
-    return res.status(200).json(bookUpdate);
+    return await res.status(200).json(bookUpdate);
   } catch (err) {
     return res.status(400).send(err);
   }
@@ -138,7 +138,7 @@ exports.deleteSingleBook = async (req, res, next) => {
     if (!deleteBook) {
       return res.status(404).send(`No Book found to Delete by Id: ${bookId}`);
     }
-    return res.status(200).send(`Book Deleted ${deleteBook}`);
+    return await res.status(200).send(`Book Deleted ${deleteBook}`);
   } catch (err) {
     return res.status(400).send(err);
   }
@@ -147,7 +147,7 @@ exports.deleteSingleBook = async (req, res, next) => {
 // Search Book
 exports.searchBook = async (req, res, next) => {
   const search = req.params.search;
-  console.log(search);
+  console.log(typeof search);
   //below will search for malik but if malikmazhar is available it will bring that as well. $ is not at the end will continue looking for similar words.
   const regexFree = new RegExp(['^', search].join(''), 'i');
   //   const regexsecond = db.users.find( { 'name' : { '$regex' : yourvalue, '$options' : 'i' } } )
@@ -162,17 +162,16 @@ exports.searchBook = async (req, res, next) => {
         { classification: { $regex: search, $options: 'i' } },
         { 'author.name': { $regex: search, $options: 'i' } },
         { keywords: { $regex: search, $options: 'i' } }
-
-        // below are ints they are not applicable ... will have to find a way
-        // { 'depth.min': { $in: regexFree } },
-        // { 'depth.min': { $in: regexFree } }
+        // Cant use Numbers with regex :( ---- below is the solution for int / number will have to use another route for it...
+        // { pages: { $in: search } }
+        // { pages: { $gte: search } }
       ]
     });
 
     if (!bookSearch) {
       return res.status(404).send('Sorry no matching book found');
     }
-    return res.status(200).send(bookSearch);
+    return await res.status(200).send(bookSearch);
   } catch (err) {
     throw err;
   }

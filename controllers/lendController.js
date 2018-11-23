@@ -27,7 +27,7 @@ exports.getLendById = async (req, res, next) => {
     if (!singleBook) {
       return res.status(404).send(`No book Found by the given ID: ${bookId}`);
     }
-    return res.status(200).json(singleBook);
+    return await res.status(200).json(singleBook);
   } catch (err) {
     return res.status(400).send(err);
   }
@@ -75,7 +75,7 @@ exports.addLend = async (req, res, next) => {
       //   { new: true }
     );
     // const saveBook = await editBook.save();
-    return res.status(200).send(saveLend);
+    return await res.status(200).send(saveLend);
   } catch (err) {
     res.status(400).send(err);
   }
@@ -102,8 +102,8 @@ exports.returnLend = async (req, res, next) => {
         $set: {
           isActive: false
         }
-      },
-      { new: true }
+      }
+      //   { new: true }
     );
     const editBook = await Book.updateOne(
       { _id: requestedBook },
@@ -114,7 +114,36 @@ exports.returnLend = async (req, res, next) => {
       },
       { new: true }
     );
-    return res.send(lendedBook);
+    return await res.send(requestedBook);
+  } catch (err) {
+    throw err;
+  }
+};
+
+exports.renewLend = async (req, res, next) => {
+  const lendId = req.params.id;
+  const lendedBook = await Lend.findById(lendId);
+  try {
+    if (!lendedBook) {
+      return res.status(404).send('no lend book record found with given Id');
+    }
+
+    const returnDate = lendedBook.returnDate.setDate(
+      lendedBook.returnDate.getDate() + 7
+    );
+    const editLend = await Lend.updateOne(
+      {
+        _id: lendedBook.id
+      },
+      {
+        $set: {
+          returnDate: returnDate
+        }
+      },
+      { new: true }
+    );
+    return await res.json(lendedBook);
+    // const extendLendDate = await lendedBook
   } catch (err) {
     throw err;
   }

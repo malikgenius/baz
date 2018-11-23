@@ -4,16 +4,23 @@ const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const morgan = require('morgan');
 const cors = require('cors');
+const passport = require('passport');
 
 // Import Routes Files from Routes/api/.....
 const book = require('./routes/api/book/bookRoute');
 const lend = require('./routes/api/lend/lendRoute');
+const user = require('./routes/api/user/userRoute');
 
 const app = express();
 
 // MiddleWare
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+// Passport
+app.use(passport.initialize());
+//Passport Jwt Strategy
+require('./passport/passport');
 
 //Logging
 app.use(morgan('combined'));
@@ -42,6 +49,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Routes
+app.use('/api/user', user);
 app.use('/api/book', book);
 app.use('/api/lend', lend);
 

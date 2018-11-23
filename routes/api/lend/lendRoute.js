@@ -4,7 +4,8 @@ const {
   getAllLends,
   getLendById,
   addLend,
-  returnLend
+  returnLend,
+  renewLend
 } = require('../../../controllers/lendController');
 
 // Get Route for All books ....
@@ -16,7 +17,7 @@ router.post('/addlend/:id', addLend);
 // Edit / Update Book
 router.post('/return-lend/:id', returnLend);
 // RENEW LEND / Update Book
-// router.post('/renewlend/:id', renewLend);
+router.post('/renewlend/:id', renewLend);
 // // Delete Book route
 // router.post('/deletebook/:id', deleteSingleBook);
 // // LEND BOOk REQUEST FROM EMPLOYEE
