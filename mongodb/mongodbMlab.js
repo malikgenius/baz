@@ -5,7 +5,7 @@ const mongobazMlab = require('../config/Keys').mongobazMlab;
 mongoose
   .connect(
     mongobazMlab,
-    { useNewUrlParser: true }
+    { useNewUrlParser: true, useCreateIndex: true }
   )
   .then(err => {
     console.log('mongoFullStackAuth Mlab is connected!');

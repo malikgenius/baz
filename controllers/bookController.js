@@ -6,7 +6,12 @@ Joi.objectId = require('joi-objectid')(Joi);
 
 // get all books
 exports.getAllBooks = async (req, res, next) => {
-  const findBooks = await Book.find()
+  const findBooks = await Book.find(
+    {},
+    // either use projection or .select() both will work, check if projection is better than select or not ?
+    { title: 1, classification: 1, author: 1, imageUrl: 1 }
+  )
+    // .select('title classfication author pages imageUrl ')
     .populate('lend.lend')
     .sort({ createdAt: -1 });
   try {
@@ -35,47 +40,42 @@ exports.getBookById = async (req, res, next) => {
 
 // Single Book Add @POST
 exports.addBook = async (req, res, next) => {
-  console.log(req.body);
-  let author = [];
-  if (req.body.author1) {
-    author.push(req.body.author1);
+  // keywods are the comma seperated values, we will make them an array so can map over it in the future ..
+  let keywords = [];
+  if (req.body.keywords) {
+    // keywords.push(req.body.keywords.split(','));
+    keywords = req.body.keywords.split(',');
+    // console.log(keywords);
   }
-  if (req.body.author2) {
-    author.push(req.body.author2);
-  }
-  if (req.body.author3) {
-    author.push(req.body.author3);
-  }
-  if (req.body.author4) {
-    author.push(req.body.author4);
-  }
-  if (req.body.author5) {
-    author.push(req.body.author5);
-  }
-  // the way it should be recieved from front end form ... dont know any better way yet but this works in addbook and editbook as well.
-  // below is postman example not the React .. find out way in next.js or react.js
 
-  //   "author1": {
-  // 	"name": "Malik",
-  // 	"email": "m@mail.com",
-  // 	"website": "mysite.com"
-  // },
-  // "author2": {
-  // 	"name": "Malik2",
-  // 	"email": "m@mail2.com",
-  // 	"website": "mysite2.com"
-  // },
-  // "author3": {
-  // 	"name": "Malik3",
-  // 	"email": "m3@mail.com",
-  // 	"website": "mysite3.com"
+  // let author = [];
+  // if (req.body.author1) {
+  //   author.push(req.body.author1);
   // }
+  // if (req.body.author2) {
+  //   author.push(req.body.author2);
+  // }
+  // if (req.body.author3) {
+  //   author.push(req.body.author3);
+  // }
+  // if (req.body.author4) {
+  //   author.push(req.body.author4);
+  // }
+  // if (req.body.author5) {
+  //   author.push(req.body.author5);
+  // }
+
+  // author we can send a array with objects including values of author like below, check the playground mongo-aggregation file on how to send it from frontend.
+  //from the frontend it should come like this....
+  // [ { name: 'malik', email: 'malik@zeenah.com' },
+  // { name: 'Ali', email: 'ali@zeenah.com' } ]
+
   const newBook = {
     title: req.body.title,
     classification: req.body.classification,
-    author,
+    author: req.body.author,
     isbn: req.body.isbn,
-    keywords: req.body.keywords,
+    keywords,
     pages: req.body.pages
   };
   const book = new Book(newBook);
@@ -92,23 +92,25 @@ exports.editSingleBook = async (req, res, next) => {
   const bookId = req.params.id;
 
   let bookFields = {};
-  let author = [];
-  if (req.body.author1) {
-    author.push(req.body.author1);
-  }
-  if (req.body.author2) {
-    author.push(req.body.author2);
-  }
-  if (req.body.author3) {
-    author.push(req.body.author3);
-  }
-  if (req.body.author4) {
-    author.push(req.body.author4);
-  }
-  if (req.body.author5) {
-    author.push(req.body.author5);
-  }
-  bookFields.author = author;
+
+  // let author = [];
+  // if (req.body.author1) {
+  //   author.push(req.body.author1);
+  // }
+  // if (req.body.author2) {
+  //   author.push(req.body.author2);
+  // }
+  // if (req.body.author3) {
+  //   author.push(req.body.author3);
+  // }
+  // if (req.body.author4) {
+  //   author.push(req.body.author4);
+  // }
+  // if (req.body.author5) {
+  //   author.push(req.body.author5);
+  // }
+  // we should not use above method but should send author in [array] to be saved as an array of objects..
+  bookFields.author = req.body.author;
   bookFields.title = req.body.title;
   bookFields.classification = req.body.classification;
   bookFields.auther = req.body.auther;
@@ -154,25 +156,27 @@ exports.searchBook = async (req, res, next) => {
   try {
     // const bookSearch = await Book.find({ title: { $in: regexFree } });
     // $regex works with any word search .. will extend it to search in any field.
-    const bookSearch = await Book.find({
-      //   title: { $regex: search, $options: 'i' }
-
-      $or: [
-        { title: { $regex: search, $options: 'i' } },
-        { classification: { $regex: search, $options: 'i' } },
-        { 'author.name': { $regex: search, $options: 'i' } },
-        { keywords: { $regex: search, $options: 'i' } }
-        // Cant use Numbers with regex :( ---- below is the solution for int / number will have to use another route for it...
-        // { pages: { $in: search } }
-        // { pages: { $gte: search } }
-      ]
-    });
+    const bookSearch = await Book.find(
+      {
+        // created text index in shell will do the $text search which is powerful than regex
+        $text: { $search: [search] }
+      },
+      // sorting will help in bringing better hit up top (first in the list), it scores high in sorting..
+      { score: { $meta: 'textScore' } },
+      // for search we dont need all the fields but only few to show on drop down search list DownShift npm will show it in react.
+      { title: 1, classification: 1, author: 1, imageUrl: 1, score: 1 }
+    )
+      // sort the score will inforce the score to sort, it works perfect without this but below will inforce it..
+      .sort({ score: { $meta: 'textScore' } })
+      .limit(10);
+    // we are using PROJECTION here, can use .select as well but i guess projection is awesome.
+    // .select('title classification pages author imageUrl');
 
     if (!bookSearch) {
       return res.status(404).send('Sorry no matching book found');
     }
-    return await res.status(200).send(bookSearch);
+    return await res.status(200).json(bookSearch);
   } catch (err) {
-    throw err;
+    return res.status(400).send('Something went wrong, Please try again ');
   }
 };

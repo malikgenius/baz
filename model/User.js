@@ -65,6 +65,13 @@ UserSchema.pre('save', function userSchemaPre(next) {
   }
 });
 
+// Define Indexes check wesbos node course for details...
+UserSchema.index({
+  firstname: 'text',
+  lastname: 'text',
+  email: 'text'
+});
+
 const User = mongoose.model('users', UserSchema);
 
 module.exports = User;

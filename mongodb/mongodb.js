@@ -4,7 +4,8 @@ const mongoLOCAL = require('../config/Keys').mongoLOCAL;
 mongoose
   .connect(
     mongoLOCAL,
-    { useNewUrlParser: true }
+    // Create Index True will not warn when creating indexes in Model .. check the model and wesbos node.js course 32 lecture
+    { useNewUrlParser: true, useCreateIndex: true }
   )
   .then(err => {
     console.log('mongoLOCAL is connected!');

@@ -80,7 +80,7 @@ exports.loginUser = async (req, res, next) => {
         .json(`Please confirm your email ${email} to activate your account`);
     }
     const token = await jwt.sign(payload, secretOrKey, { expiresIn: '24h' });
-    res.cookie('jwt', token);
+    res.cookie('jwt', token, { httpOnly: true });
     console.log({ token: token });
     return res.json({ token: 'JWT' + token });
   } catch (err) {
@@ -92,11 +92,15 @@ exports.loginUser = async (req, res, next) => {
 exports.getAllUsers = async (req, res, next) => {
   //   console.log(req.cookies);
   try {
-    const user = await User.find();
-    if (!user) {
-      return res.status(404).json('Sorry no user found');
+    // only send selected fields back to frontend and not the whole user info by using .select()
+    const findUsers = await User.find().select(
+      'firstname lastname email isAdmin active createdAt updatedAt imageUrl'
+    );
+    if (!findUsers) {
+      return res.status(404).json('Sorry no users found');
     }
-    return res.status(200).json(user);
+
+    return res.status(200).json(findUsers);
   } catch (err) {
     throw err;
   }
@@ -111,9 +115,46 @@ exports.getUserById = async (req, res, next) => {
         .status(400)
         .json('Sorry you are not Authorized to view this Page');
     }
-    const findUser = await User.findById(userId);
+    const findUser = await User.findById(userId).select(
+      'firstname lastname isAdmin active createdAt updatedAt imageUrl'
+    );
+    // const returnUser = await {
+    //   firstname: findUser.firstname,
+    //   lastname: findUser.lastname,
+    //   email: findUser.email,
+    //   imageUrl: findUser.imageUrl,
+    //   isAdmin: findUser.isAdmin,
+    //   active: findUser.active
+    // };
     return res.status(200).json(findUser);
   } catch (err) {
     throw err;
+  }
+};
+
+// Search User Only Admin route Private Route
+exports.searchUser = async (req, res) => {
+  const search = req.params.search;
+  try {
+    if (!req.user.isAdmin) {
+      return res.status(403).json('Not Authorized to view this page');
+    }
+    const userSearch = await User.find(
+      {
+        $text: { $search: [search] }
+      },
+      { score: { $meta: 'textScore' } },
+      {}
+    )
+      .sort({
+        score: { $meta: 'textScore' }
+      })
+      .limit(5);
+    if (!userSearch) {
+      return res.status(404).send('sorry no matching user found');
+    }
+    return res.status(200).json(userSearch);
+  } catch (error) {
+    return res.status(500).json('Something went wrong, Please try again later');
   }
 };

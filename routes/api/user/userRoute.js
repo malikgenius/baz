@@ -4,6 +4,7 @@ const passport = require('passport');
 const {
   getAllUsers,
   getUserById,
+  searchUser,
   registerUser,
   loginUser
 } = require('../../../controllers/userController');
@@ -27,6 +28,14 @@ router.get(
     session: false
   }),
   getUserById
+);
+// Search user -- using mongodb text indexes ... awesome solution for text searches ..
+router.get(
+  '/searchuser/:search',
+  passport.authenticate('jwt', {
+    session: false
+  }),
+  searchUser
 );
 
 module.exports = router;

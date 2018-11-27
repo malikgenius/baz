@@ -15,7 +15,10 @@ const app = express();
 
 // MiddleWare
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(
+  bodyParser.urlencoded({ extended: false }, { defaultCharset: 'utf-8' })
+);
+// below will parse cookie to get the JWT Token from it and passport will analyze the jwt token and authenticate user if valid.
 app.use(cookieParser());
 // Passport
 app.use(passport.initialize());
@@ -60,3 +63,33 @@ app.listen(port, err => {
   }
   console.log(`listening on port ${port}`);
 });
+
+// sequelize db with app
+// sequelize
+//   .sync({ force: true, logging: console.log })
+//   .then(result => {
+//     // console.log(result);
+//     Product.findOne().then(product => {
+//       console.log(product.get('title'));
+//     });
+//     // return Product.create({
+//     //   title: 'شسيب',
+//     //   price: 200,
+//     //   imageUrl: 'no url for image yet',
+//     //   description: 'testing arabic text search'
+//     // });
+//     // app.listen(5000);
+//   })
+//   .catch(err => {
+//     console.log(err);
+//   });
+
+// sequelize
+//   .sync()
+//   .then(result => {
+//     // console.log(result);
+//     app.listen(3000);
+//   })
+//   .catch(err => {
+//     console.log(err);
+//   });
