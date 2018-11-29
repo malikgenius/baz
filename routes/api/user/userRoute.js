@@ -6,7 +6,8 @@ const {
   getUserById,
   searchUser,
   registerUser,
-  loginUser
+  loginUser,
+  myTagList
 } = require('../../../controllers/userController');
 
 // Register new User @Post Route
@@ -37,5 +38,9 @@ router.get(
   }),
   searchUser
 );
+
+router.get('/*', (req, res) => {
+  res.status(404).send('NOT FOUND');
+});
 
 module.exports = router;

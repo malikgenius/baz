@@ -34,10 +34,19 @@ const BookSchema = new Schema(
     },
     title: {
       type: String,
-      required: true,
+      // required: true,
       lowercase: true
     },
-
+    subtitle: {
+      type: String
+      // required: true,
+      // lowercase: true
+    },
+    subject: {
+      type: String,
+      // required: true,
+      lowercase: true
+    },
     edition: {
       type: String
     },
@@ -66,37 +75,55 @@ const BookSchema = new Schema(
       type: [String],
       lowercase: true
     },
-    edited_book: [],
+    call: {
+      type: String
+    },
+    imageUrl: {
+      type: String
+    },
     inStock: {
       type: Boolean,
       default: true
-    }
+    },
+    edited_book: []
   },
   { timestamps: true }
 );
 
-// Define Indexes check wesbos node course for details...
+// Define Indexes check wesbos node course for details... its working with arabic and english text if request comes from UTF-8 means browser and not from postman.
 BookSchema.index(
   {
     title: 'text',
     classification: 'text',
     'author.name': 'text',
-    keywords: 'text'
+    tags: 'text'
   },
   { background: true }
 );
-
-// Text Index does not work on mixed Arabic and english ... lets try normal index.
-// BookSchema.index({
-//   title: 1,
-//   classification: 1,
-//   'author.name': 1,
-//   keywords: 1
-// });
 // to avoid the deprication warning in console about the indexes ...
 mongoose.set('useCreateIndex', true);
+
+// Static Aggregation function to find all the keywords..  wesbos node course
+BookSchema.statics.getKeywordsList = function() {
+  return this.aggregate([
+    { $unwind: '$keywords' },
+    { $group: { _id: '$keywords', count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
+    { $limit: 10 }
+  ]);
+};
+// Static Aggregation func to find author contributed in how many books.....
+BookSchema.statics.getAuthorsList = function() {
+  return this.aggregate([
+    { $unwind: '$author' },
+    { $group: { _id: '$author.name', count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
+    { $limit: 10 }
+  ]);
+};
 
 // define Pagination here
 BookSchema.plugin(BookPaginate);
 
-module.exports = Book = mongoose.model('book', BookSchema);
+const Book = mongoose.model('books', BookSchema);
+module.exports = Book;

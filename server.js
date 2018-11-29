@@ -25,14 +25,6 @@ app.use(passport.initialize());
 //Passport Jwt Strategy
 require('./passport/passport');
 
-//Logging
-app.use(morgan('combined'));
-app.use(
-  morgan('common', {
-    stream: fs.createWriteStream('./access.log', { flags: 'a' })
-  })
-);
-
 // CORS Allowed, if app sends request to thirdparty we need CORS or will get an error.
 app.use(cors());
 // app.use(function(req, res, next) {
@@ -44,6 +36,13 @@ app.use(cors());
 //   next();
 // });
 
+//Logging
+app.use(morgan('combined'));
+app.use(
+  morgan('common', {
+    stream: fs.createWriteStream('./access.log', { flags: 'a' })
+  })
+);
 // mongodb load on startup
 if (process.env.NODE_ENV === 'production') {
   require('./mongodb/mongodbMlab');
@@ -63,33 +62,3 @@ app.listen(port, err => {
   }
   console.log(`listening on port ${port}`);
 });
-
-// sequelize db with app
-// sequelize
-//   .sync({ force: true, logging: console.log })
-//   .then(result => {
-//     // console.log(result);
-//     Product.findOne().then(product => {
-//       console.log(product.get('title'));
-//     });
-//     // return Product.create({
-//     //   title: 'شسيب',
-//     //   price: 200,
-//     //   imageUrl: 'no url for image yet',
-//     //   description: 'testing arabic text search'
-//     // });
-//     // app.listen(5000);
-//   })
-//   .catch(err => {
-//     console.log(err);
-//   });
-
-// sequelize
-//   .sync()
-//   .then(result => {
-//     // console.log(result);
-//     app.listen(3000);
-//   })
-//   .catch(err => {
-//     console.log(err);
-//   });

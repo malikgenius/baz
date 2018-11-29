@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 const Book = require('../model/Book');
-const Lend = require('../model/Lend');
+const User = require('../model/User');
 const Joi = require('joi');
 Joi.objectId = require('joi-objectid')(Joi);
 
@@ -40,8 +40,9 @@ exports.getBookById = async (req, res, next) => {
 
 // Single Book Add @POST
 exports.addBook = async (req, res, next) => {
+  console.log(req.body);
   // keywods are the comma seperated values, we will make them an array so can map over it in the future ..
-  let keywords = [];
+  let tags = [];
   if (req.body.keywords) {
     // keywords.push(req.body.keywords.split(','));
     keywords = req.body.keywords.split(',');
@@ -178,5 +179,56 @@ exports.searchBook = async (req, res, next) => {
     return await res.status(200).json(bookSearch);
   } catch (err) {
     return res.status(400).send('Something went wrong, Please try again ');
+  }
+};
+
+// Keywrods Count through aggregation configured in Book Schema model .. check /model/Book.js BookSchema.static.getKeywordsList
+exports.getBookByTag = async (req, res) => {
+  console.log(req.body);
+  try {
+    const tags = await Book.keywordsList;
+    console.log(tags);
+    return res.json(tags);
+  } catch (error) {
+    return res.status(500).send('something went bad');
+  }
+  // const keywords = await User.aggregate([
+  //   { $unwind: '$firstname' },
+  //   { $group: { _id: { mytags: '$firstname' }, count: { $sum: 1 } } }
+  // ]);
+};
+// check single tag was used how many times ... Aggregation is done in Book Schema statics func, check there .
+exports.getAllKeywords = async (req, res) => {
+  // console.log(Book.getTagList());
+  const tags = await Book.getKeywordsList();
+  res.json(tags);
+};
+
+// check single author contributed in how many books ... Aggregation is done in Book Schema statics func, check there .
+exports.getAuthorBooks = async (req, res) => {
+  try {
+    const authorCount = await Book.getAuthorsList();
+    res.status(200).json(authorCount);
+  } catch (error) {
+    res.status(400).send('something went wrong, please try again later');
+  }
+};
+
+// Get all the books by single author ..
+exports.getAllBooksByAuthor = async (req, res) => {
+  const Author = req.params.author;
+  const allBooksByAuthor = await Book.find(
+    { 'author.name': Author },
+    // for search we dont need all the fields but only few to show on drop down search list DownShift npm will show it in react.
+
+    { title: 1, classification: 1, author: 1, imageUrl: 1, score: 1 }
+  );
+  try {
+    if (!allBooksByAuthor.length) {
+      res.status(404).send('Sorry no books found!');
+    }
+    res.json(allBooksByAuthor);
+  } catch (error) {
+    res.status(400).send('something went wrong, please try again later');
   }
 };
