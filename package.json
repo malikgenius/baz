@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon npm run server"
+    "dev": "nodemon npm run server",
+    "client": "npm run dev --prefix client",
+    "fullstack": "concurrently \"npm run server\" \"npm run client\""
   },
   "author": "MALIK",
   "license": "ISC",
@@ -31,6 +33,7 @@
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
     "randomstring": "^1.1.5",
-    "sequelize": "^4.41.2"
+    "sequelize": "^4.41.2",
+    "slug": "^0.9.2"
   }
 }

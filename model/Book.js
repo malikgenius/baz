@@ -29,31 +29,37 @@ const BookSchema = new Schema(
       // required: true
     },
     classification: {
-      type: String
+      type: Number
       // required: true
     },
     title: {
       type: String,
       // required: true,
-      lowercase: true
+      lowercase: true,
+      trim: true
     },
     subtitle: {
-      type: String
+      type: String,
+      trim: true
       // required: true,
       // lowercase: true
     },
     subject: {
       type: String,
       // required: true,
-      lowercase: true
+      lowercase: true,
+      trim: true
     },
     edition: {
-      type: String
+      type: Number
     },
     volume: {
-      type: String
+      type: Number
     },
     type: {
+      type: String
+    },
+    language: {
       type: String
     },
     publisher: {
@@ -94,9 +100,14 @@ const BookSchema = new Schema(
 BookSchema.index(
   {
     title: 'text',
-    classification: 'text',
+    isbn: 'text',
+    subtitle: 'text',
     'author.name': 'text',
-    tags: 'text'
+    subject: 'text',
+    keywords: 'text',
+    call: 'text',
+    publisher: 'text',
+    published_place: 'text'
   },
   { background: true }
 );

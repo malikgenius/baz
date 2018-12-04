@@ -1,0 +1,26 @@
+export const GET_ERRORS = 'GET_ERRORS';
+export const GET_SUCCESS = 'GET_SUCCESS';
+export const GET_USER = 'GET_USER';
+export const LOGIN_USER = 'LOGIN_USER';
+export const SET_CURRENT_USER = 'SET_CURRENT_USER';
+export const GET_LOGIN_ERRORS = 'GET_LOGIN_ERRORS';
+export const EMAIL_VERIFIED_PASSWORD_RESET = 'EMAIL_VERIFIED_PASSWORD_RESET';
+export const GET_SUCCESS_RESET = 'GET_SUCCESS_RESET';
+// contact Modal close
+export const CONTECT_MODAL_CLOSE = 'CONTACT_MODAL_CLOSE';
+// profile types
+export const GET_PROFILE = 'GET_PROFILE';
+export const GET_PROFILES = 'GET_PROFILES';
+export const PROFILE_LOADING = 'PROFILE_LOADING';
+export const PROFILE_NOT_FOUND = 'PROFILE_NOT_FOUND';
+export const CLEAR_CURRENT_PROFILE = 'CLEAR_CURRENT_PROFILE';
+export const CLEAR_ALL_PROFILES = 'CLEAR_ALL_PROFILES';
+export const GET_ERRORS_RESET = 'GET_ERRORS_RESET';
+export const GET_LOGIN_ERROR_RESET = 'GET_LOGIN_ERROR_RESET';
+export const GET_PAGINATION_PAGES = 'GET_PAGINATION_PAGES';
+// Boxes and Total Records count
+export const GET_ALL_RECORDS = 'GET_ALL_RECORDS';
+export const GET_ALL_BOXES = 'GET_ALL_BOXES';
+export const CLEAR_ALL_RECORDS = 'CLEAR_ALL_RECORDS';
+// Deleted Stocks Record
+export const GET_DELETED_STOCKS = 'GET_DELETED_STOCKS';

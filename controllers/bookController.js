@@ -6,11 +6,12 @@ Joi.objectId = require('joi-objectid')(Joi);
 
 // get all books
 exports.getAllBooks = async (req, res, next) => {
-  const findBooks = await Book.find(
-    {},
+  const findBooks = await Book
+    .find
+    // {}
     // either use projection or .select() both will work, check if projection is better than select or not ?
-    { title: 1, classification: 1, author: 1, imageUrl: 1 }
-  )
+    // { title: 1, classification: 1, author: 1, imageUrl: 1 }
+    ()
     // .select('title classfication author pages imageUrl ')
     .populate('lend.lend')
     .sort({ createdAt: -1 });
@@ -18,7 +19,8 @@ exports.getAllBooks = async (req, res, next) => {
     if (!findBooks) {
       return res.status(404).send('No Books Found!');
     }
-    return await res.status(200).json(findBooks);
+    console.log(findBooks);
+    return res.status(200).json(findBooks);
   } catch (err) {
     return res.status(400).send(err);
   }
@@ -72,12 +74,22 @@ exports.addBook = async (req, res, next) => {
   // { name: 'Ali', email: 'ali@zeenah.com' } ]
 
   const newBook = {
-    title: req.body.title,
-    classification: req.body.classification,
-    author: req.body.author,
     isbn: req.body.isbn,
+    title: req.body.title,
+    subtitle: req.body.subtitle,
+    subject: req.body.subject,
+    classification: req.body.classification,
+    call: req.body.call,
+    author: req.body.author,
+    edition: req.body.edition,
+    volume: req.body.volume,
+    type: req.body.type,
+    publisher: req.body.publisher,
+    published_place: req.body.published_place,
+    published_year: req.body.published_year,
     keywords,
-    pages: req.body.pages
+    pages: req.body.pages,
+    imageUrl: req.body.imageUrl
   };
   const book = new Book(newBook);
   try {
@@ -163,9 +175,9 @@ exports.searchBook = async (req, res, next) => {
         $text: { $search: [search] }
       },
       // sorting will help in bringing better hit up top (first in the list), it scores high in sorting..
-      { score: { $meta: 'textScore' } },
+      { score: { $meta: 'textScore' } }
       // for search we dont need all the fields but only few to show on drop down search list DownShift npm will show it in react.
-      { title: 1, classification: 1, author: 1, imageUrl: 1, score: 1 }
+      // { title: 1, classification: 1, author: 1, imageUrl: 1, score: 1 }
     )
       // sort the score will inforce the score to sort, it works perfect without this but below will inforce it..
       .sort({ score: { $meta: 'textScore' } })
@@ -205,30 +217,44 @@ exports.getAllKeywords = async (req, res) => {
 };
 
 // check single author contributed in how many books ... Aggregation is done in Book Schema statics func, check there .
+// it will bring all the book counts and if we pass author param all the books related to single author will come.
 exports.getAuthorBooks = async (req, res) => {
+  const author = req.params.author;
   try {
-    const authorCount = await Book.getAuthorsList();
-    res.status(200).json(authorCount);
+    const authorPromise = Book.getAuthorsList();
+    const booksPromise = Book.find({ 'author.name': author }).limit(10);
+    // both promises join together to get all the books by author and single author contributed in books count.
+    const result = await Promise.all([authorPromise, booksPromise]);
+    return res.status(200).json(result);
   } catch (error) {
-    res.status(400).send('something went wrong, please try again later');
+    return res.status(400).send('Something went wrong');
   }
 };
+// exports.getAuthorBooks = async (req, res) => {
+//   try {
+//     const authorCount = await Book.getAuthorsList();
+//     res.status(200).json(authorCount);
+//   } catch (error) {
+//     res.status(400).send('something went wrong, please try again later');
+//   }
+// };
 
+// below is a tradition way of another route to /:author but wes bos using Promise.All to have 2 in one .. lets see what comes up.
 // Get all the books by single author ..
-exports.getAllBooksByAuthor = async (req, res) => {
-  const Author = req.params.author;
-  const allBooksByAuthor = await Book.find(
-    { 'author.name': Author },
-    // for search we dont need all the fields but only few to show on drop down search list DownShift npm will show it in react.
+// exports.getAllBooksByAuthor = async (req, res) => {
+//   const Author = req.params.author;
+//   try {
+//     const allBooksByAuthor = await Book.find(
+//       { 'author.name': Author },
+//       // for search we dont need all the fields but only few to show on drop down search list DownShift npm will show it in react.
 
-    { title: 1, classification: 1, author: 1, imageUrl: 1, score: 1 }
-  );
-  try {
-    if (!allBooksByAuthor.length) {
-      res.status(404).send('Sorry no books found!');
-    }
-    res.json(allBooksByAuthor);
-  } catch (error) {
-    res.status(400).send('something went wrong, please try again later');
-  }
-};
+//       { title: 1, classification: 1, author: 1, imageUrl: 1, score: 1 }
+//     );
+//     if (!allBooksByAuthor.length) {
+//       res.status(404).send('Sorry no books found!');
+//     }
+//     res.json(allBooksByAuthor);
+//   } catch (error) {
+//     res.status(400).send('something went wrong, please try again later');
+//   }
+// };

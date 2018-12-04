@@ -21,9 +21,12 @@ router.post('/addbook', addBook);
 // get All tags count... it will return how many times oman was used in tags .. check wesbos
 router.get('/keywords', getAllKeywords);
 // one author contributed in how many books, when someone click on this in frontend should go to all those books which includes the selected author ..
-router.get('/author-books/', getAuthorBooks);
+router.get('/authors', getAuthorBooks);
 // get all the books by author from the link where author-books shows all books related to single author.
-router.get('/author-books/:author', getAllBooksByAuthor);
+// to get all on same Controller we can use below but if we want to keep them seperate we should go for seperate routes ..
+router.get('/authors/:author', getAuthorBooks);
+// seperate routes .. will decide in React how to show this data ..
+// router.get('/authors/:author', allBooksByAuthor);
 
 // Edit / Update Book
 router.post('/editbook/:id', editSingleBook);

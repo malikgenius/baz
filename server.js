@@ -15,9 +15,7 @@ const app = express();
 
 // MiddleWare
 app.use(bodyParser.json());
-app.use(
-  bodyParser.urlencoded({ extended: false }, { defaultCharset: 'utf-8' })
-);
+app.use(bodyParser.urlencoded({ extended: true }, { defaultCharset: 'utf-8' }));
 // below will parse cookie to get the JWT Token from it and passport will analyze the jwt token and authenticate user if valid.
 app.use(cookieParser());
 // Passport

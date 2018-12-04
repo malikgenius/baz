@@ -6,15 +6,18 @@ const UserSchema = Schema(
   {
     firstname: {
       type: String,
-      lowercase: true
+      // lowercase: true
+      trim: true
     },
     lastname: {
       type: String,
-      lowercase: true
+      // lowercase: true
+      trim: true
     },
     email: {
       type: String,
-      lowercase: true
+      lowercase: true,
+      trim: true
     },
     password: {
       type: String
